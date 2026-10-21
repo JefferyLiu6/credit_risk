@@ -1,0 +1,47 @@
+[project]
+name = "credit-risk-champion-challenger"
+version = "0.1.0"
+description = "Governance-first champion/challenger pipeline for credit default risk"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115.0",
+    "joblib>=1.6.0",
+    "kaggle>=2.2.4",
+    "lightgbm>=4.7.0",
+    "matplotlib>=3.11.2",
+    "numpy>=2.5.4",
+    "pandas>=3.0.6",
+    "scikit-learn>=1.9.1",
+    "scipy>=1.18.1",
+    "shap>=0.53.0",
+    "xgboost>=3.4.1",
+    "uvicorn>=0.34.0",
+]
+
+[project.scripts]
+credit-risk = "credit_risk_champion_challenger.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.12.7,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "ipykernel>=7.4.0",
+    "jupyterlab>=4.6.4",
+    "pytest>=9.1.1",
+    "ruff>=0.17.0",
+    "httpx>=0.28.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

@@ -1,0 +1,10 @@
+{
+  "min_auc_lift": 0.005,
+  "min_ap_lift": 0.0,
+  "min_ks_lift": 0.0,
+  "max_brier_increase": 0.002,
+  "psi_review_threshold": 0.1,
+  "psi_material_threshold": 0.25,
+  "random_seed": 42
+}
+

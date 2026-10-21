@@ -1,0 +1,44 @@
+{
+  "split": "stratified_random_60_20_20",
+  "dataset": "Home Credit Default Risk / application_train.csv",
+  "seed": 42,
+  "n_train": 184506,
+  "n_validation": 61502,
+  "features": [
+    "AMT_INCOME_TOTAL",
+    "AMT_CREDIT",
+    "AMT_ANNUITY",
+    "DAYS_BIRTH",
+    "DAYS_EMPLOYED",
+    "EXT_SOURCE_1",
+    "EXT_SOURCE_2",
+    "EXT_SOURCE_3",
+    "NAME_INCOME_TYPE",
+    "NAME_EDUCATION_TYPE"
+  ],
+  "training_seconds": {
+    "XGBoost": 1.4891600830014795,
+    "LightGBM": 1.4383433340117335
+  },
+  "metrics": {
+    "Logistic Regression": {
+      "ROC-AUC": 0.7292863974987657,
+      "Average Precision": 0.2094141040061807,
+      "Brier Score": 0.06947973151436612,
+      "KS Statistic": 0.34371343162863116
+    },
+    "XGBoost": {
+      "ROC-AUC": 0.7454114525184793,
+      "Average Precision": 0.23344331551534106,
+      "Brier Score": 0.0684174227289429,
+      "KS Statistic": 0.3679642065625161
+    },
+    "LightGBM": {
+      "ROC-AUC": 0.7447366509051697,
+      "Average Precision": 0.23281618274643562,
+      "Brier Score": 0.06844416291690168,
+      "KS Statistic": 0.3654383379234527
+    }
+  },
+  "note": "All metrics are validation-only. No out-of-time or independent bank validation claimed."
+}

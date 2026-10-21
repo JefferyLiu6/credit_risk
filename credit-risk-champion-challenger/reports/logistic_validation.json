@@ -1,0 +1,9 @@
+{
+  "model": "LogisticRegression",
+  "split": "validation",
+  "roc_auc": 0.7292863974987657,
+  "pr_auc": 0.2094141040061807,
+  "brier_score": 0.06947973151436612,
+  "ks_statistic": 0.34371343162863116,
+  "n_features": 10
+}
