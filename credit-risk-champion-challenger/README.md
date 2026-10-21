@@ -1,101 +1,121 @@
 # Credit Risk Champion–Challenger
 
-A governance-first credit default modeling project built on the Home Credit Default Risk
-dataset. Instead of declaring the highest validation score the winner, this repository keeps an
-interpretable Logistic Regression incumbent, benchmarks XGBoost and LightGBM on the same frozen
-split, and requires explicit promotion gates before a challenger can become champion.
+**From loan application data to model evaluation, business decisions, and a working scoring prototype.**
 
-## Current decision
+This project investigates a practical question: **does a more complex machine learning model improve credit-risk predictions enough to justify its added complexity?**
 
-| Model | Role | Validation ROC-AUC | Average precision | Brier score | KS |
-|---|---|---:|---:|---:|---:|
-| Logistic Regression | incumbent champion | 0.7293 | 0.2094 | 0.0695 | 0.3437 |
-| XGBoost | leading challenger | **0.7454** | **0.2334** | **0.0684** | **0.3680** |
-| LightGBM | challenger | 0.7447 | 0.2328 | 0.0684 | 0.3654 |
+It uses **307,511 Home Credit applications** to compare an interpretable Logistic Regression baseline with XGBoost and LightGBM. The analysis then examines statistical reliability, lending-policy tradeoffs, explainability, group outcomes, and model behavior under simulated changes in the applicant population.
 
-**Decision:** XGBoost advances to locked-test review. Logistic Regression remains champion. The
-numbers above are validation results from a stratified random split—not out-of-time performance
-and not evidence of production readiness.
+“Champion–challenger” means comparing an existing baseline model—the champion—with alternative models before deciding whether to replace it. Here, it is a portfolio demonstration of that process.
 
-## What makes this version different
+[Model comparison](notebook/03_champion_challenger.ipynb) · [Business analysis](notebook/05_credit_policy_business_value.ipynb) · [Source code](src/credit_risk_champion_challenger/) · [Model card](docs/model_card.md)
 
-- A frozen 60/20/20 applicant-level split is shared by all models.
-- Preprocessing is fitted inside each model pipeline on training data only.
-- Promotion is policy-driven: discrimination, precision-recall, calibration, and KS must all pass.
-- Candidate lift is measured with a paired bootstrap on the same applications.
-- Fairness and drift utilities operate at the decision and population levels.
-- The API serves only the approved champion by default, not the latest experiment.
-- Test-set access is a deliberate final gate, not another tuning loop.
+## Key outcomes
 
-## Repository layout
+- **Compared three models fairly:** each uses the same ten input features and saved training/validation assignments.
+- **Improved validation ranking:** XGBoost achieved **0.7454 ROC-AUC**, compared with **0.7293** for the baseline, and improved average precision and probability error.
+- **Evaluated reliability:** paired bootstrap comparisons, calibration diagnostics, SHAP explanations, and group audits extend the analysis beyond a single score.
+- **Connected predictions to business decisions:** explored approval rates, default capture, and contribution under explicit illustrative lending assumptions.
+- **Built supporting software:** reusable Python modules, complete preprocessing/model pipelines, a FastAPI scoring endpoint, unit tests, and a GitHub Actions testing workflow.
 
-```text
-credit-risk-champion-challenger/
-├── src/credit_risk_champion_challenger/
-│   ├── data.py          # schema validation and deterministic splits
-│   ├── evaluation.py    # AUC, AP, Brier, KS, paired bootstrap
-│   ├── governance.py    # candidate promotion gates
-│   ├── fairness.py      # group approval and error-rate checks
-│   ├── monitoring.py    # numeric/categorical PSI
-│   ├── reporting.py     # reproducible validation decision report
-│   ├── service.py       # framework-independent scoring service
-│   └── api.py           # FastAPI adapter for the champion
-├── notebook/
-│   ├── 01_data_exploration.ipynb
-│   ├── 02_logistic_regression.ipynb
-│   ├── 03_champion_challenger.ipynb
-│   ├── 04_model_validation.ipynb
-│   ├── 05_credit_policy_business_value.ipynb
-│   ├── 06_explainability_fairness.ipynb
-│   └── 07_monitoring_stress_testing.ipynb
-├── scripts/             # repeatable data preparation
-├── models/              # local fitted pipelines (ignored by Git)
-├── reports/             # validation evidence
-├── docs/                # model card and governance checklist
-└── tests/
-```
+All reported model results below are **validation results**. XGBoost is the leading candidate for further review; the project retains Logistic Regression as its baseline champion.
 
-## Quick start
+## Model results
 
-Python 3.12 and [`uv`](https://docs.astral.sh/uv/) are recommended.
+| Model | ROC-AUC ↑ | Average precision ↑ | Brier score ↓ | KS ↑ |
+|---|---:|---:|---:|---:|
+| Logistic Regression | 0.7293 | 0.2094 | 0.0695 | 0.3437 |
+| **XGBoost** | **0.7454** | **0.2334** | **0.0684** | **0.3680** |
+| LightGBM | 0.7447 | 0.2328 | 0.0684 | 0.3654 |
+
+- **ROC-AUC:** how well the model ranks applicants by default risk.
+- **Average precision:** how effectively it identifies defaults when they are relatively uncommon.
+- **Brier score:** error in predicted probabilities; lower is better.
+- **KS:** the maximum separation between defaulter and non-defaulter score distributions.
+
+XGBoost improves ROC-AUC by **0.0161 points** over the baseline. Paired bootstrap analysis examines the uncertainty in this improvement. The comparison supports further evaluation, while final model selection also depends on calibration, segment behavior, stability, and review.
+
+Evidence: [saved validation metrics](reports/notebook3_validation_metrics.csv), [experiment metadata](reports/notebook3_metadata.json), and [validation notebook](notebook/04_model_validation.ipynb).
+
+## What to explore
+
+The notebooks include executed results, charts, methodological explanations, and limitations. They can be reviewed directly on GitHub.
+
+| Notebook | Question answered | Skills demonstrated |
+|---|---|---|
+| [01 — Data exploration](notebook/01_data_exploration.ipynb) | What data-quality issues and risk patterns need attention? | Missingness, class imbalance, anomalous values, segment analysis |
+| [02 — Logistic Regression](notebook/02_logistic_regression.ipynb) | What can an interpretable baseline achieve? | Training-only preprocessing, coefficient interpretation, calibration |
+| [03 — Champion–challenger comparison](notebook/03_champion_challenger.ipynb) | Do more complex models improve the baseline? | Controlled comparison, boosting, multi-metric evaluation |
+| [04 — Model validation](notebook/04_model_validation.ipynb) | How reliable is the observed improvement? | Paired bootstrap, probability quality, review criteria |
+| [05 — Credit policy and business value](notebook/05_credit_policy_business_value.ipynb) | How do approval rates affect risk and illustrative contribution? | Risk deciles, default capture, policy tradeoffs, unit economics |
+| [06 — Explainability and fairness](notebook/06_explainability_fairness.ipynb) | What drives the model, and how do outcomes differ across groups? | SHAP, feature importance, group approval and error rates |
+| [07 — Monitoring and stress testing](notebook/07_monitoring_stress_testing.ipynb) | How does the model respond when the applicant population changes? | Feature/score drift, scenario analysis, monitoring response design |
+
+**Short on time?** Start with Notebooks 03 and 05 for the result and business context, then review Notebook 04 for statistical reasoning.
+
+## Design decisions and tradeoffs
+
+**A compact baseline.** Eight numeric and two categorical application features keep the comparison understandable. Bureau and repayment-history tables are available in the source dataset but are not used by these models.
+
+**Consistent development data.** A saved, stratified 60% training / 20% validation / 20% test split preserves the applicant assignments across experiments. Model performance reported here is measured on validation.
+
+**Preprocessing travels with the model.** Employment sentinel normalization, imputation, scaling, and encoding are included in the saved pipelines. Learned preprocessing parameters are fitted on training data.
+
+**Several criteria inform the decision.** ROC-AUC is considered alongside average precision, probability error, KS, explanations, and group diagnostics. The implemented comparison gates support review; they do not constitute a production approval system.
+
+**Business assumptions stay visible.** Notebook 05 uses hypothetical margins, exposure, and loss severity. Its contribution estimates demonstrate decision analysis and are not realized savings or revenue.
+
+## Engineering implementation
+
+| Component | Implementation |
+|---|---|
+| Data preparation | [Schema checks and split helpers](src/credit_risk_champion_challenger/data.py) |
+| Evaluation | [Performance metrics and paired bootstrap](src/credit_risk_champion_challenger/evaluation.py) |
+| Model comparison rules | [Candidate review gates](src/credit_risk_champion_challenger/governance.py) |
+| Group diagnostics | [Approval and error-rate analysis](src/credit_risk_champion_challenger/fairness.py) |
+| Drift analysis | [Numeric and categorical PSI](src/credit_risk_champion_challenger/monitoring.py) |
+| Inference | [Scoring service](src/credit_risk_champion_challenger/service.py) and [FastAPI endpoints](src/credit_risk_champion_challenger/api.py) |
+| Verification | [Unit tests](tests/) and [GitHub Actions workflow](../.github/workflows/tests.yml) |
+| Documentation | [Model card](docs/model_card.md) and [review checklist](docs/governance_checklist.md) |
+
+**Stack:** Python 3.12+ · pandas · NumPy · scikit-learn · XGBoost · LightGBM · SHAP · Matplotlib · FastAPI · pytest · Ruff · uv
+
+## Run the project locally
+
+From the repository root:
 
 ```bash
+cd credit-risk-champion-challenger
 uv sync
 uv run pytest
+```
+
+To rebuild the decision report from the included validation predictions:
+
+```bash
 uv run credit-risk validation-report
+```
+
+To reproduce model training and the full notebook sequence:
+
+1. Obtain the Home Credit Default Risk dataset and place `application_train.csv` in `data/raw/`.
+2. Run `uv run python scripts/01_prepare_data.py` once to create the split assignments.
+3. Run Notebooks 01–03 in order using the project's Python environment. These produce the model files and validation predictions.
+4. Run Notebooks 04–07 to reproduce the validation, policy, explanation, and monitoring analyses.
+
+Raw datasets, fitted model binaries, and the local environment are excluded from Git. Recreate the models through the notebooks before running the scoring API.
+
+### Local prediction API
+
+After training:
+
+```bash
 uv run uvicorn credit_risk_champion_challenger.api:app --reload
 ```
 
-API documentation is available at `http://127.0.0.1:8000/docs`. The local
-`models/logistic_champion.joblib` artifact must exist before the health or prediction endpoints can
-serve traffic.
+Open `http://127.0.0.1:8000/docs` to try the endpoint. The service provides `GET /health` and `POST /predict`, using the saved Logistic Regression pipeline by default.
 
-## Reproduce the workflow
-
-1. Download the Home Credit competition files into `data/raw/`.
-2. Run `uv run python scripts/01_prepare_data.py` once to freeze applicant assignments.
-3. Execute notebooks 01–03 in order. They save the fitted pipelines and validation predictions.
-4. Use Notebooks 04–07 for statistical validation, policy economics, explainability/fairness, and
-   monitoring/stress testing. The committed copies include representative outputs.
-5. Run `uv run credit-risk validation-report` to apply the promotion gates and bootstrap AUC lift.
-6. Complete the checklist in `docs/governance_checklist.md` before opening the test set.
-
-## Notebook portfolio story
-
-| Notebook | Knowledge demonstrated |
-|---|---|
-| 01 — Data exploration | target imbalance, data quality, leakage awareness |
-| 02 — Logistic Regression | interpretable baseline and pipeline-safe preprocessing |
-| 03 — Champion–challenger | comparable model training and multi-metric evaluation |
-| 04 — Model validation | paired bootstrap uncertainty, calibration, promotion governance |
-| 05 — Credit policy | risk deciles, approval frontier, loss capture, unit economics |
-| 06 — Explainability/fairness | gain importance, SHAP, decision-level group diagnostics |
-| 07 — Monitoring/stress | feature and score PSI, stress scenarios, response ownership |
-
-The large Kaggle files, fitted model binaries, and local environment are intentionally excluded
-from version control. The lockfile, source, tests, reports, and governance evidence are tracked.
-
-## Prediction request
+Example request:
 
 ```json
 {
@@ -112,16 +132,12 @@ from version control. The lockfile, source, tests, reports, and governance evide
 }
 ```
 
-The response contains a default probability and descriptive risk band. It is a model score, not an
-automatic lending decision. Threshold selection and adverse-action processes belong to the lender's
-approved credit policy.
+The response contains an estimated default probability, a descriptive risk band, and the model name.
 
-## Limitations
+## Scope and next steps
 
-- The training data is a public competition dataset, not a current lender portfolio.
-- The split is random and cannot demonstrate stability through time or across markets.
-- Only ten application-level features are modeled; bureau and payment-history tables are excluded.
-- Protected-class evaluation and local regulatory review are required before any real use.
-- The repository is educational and must not be used as the sole basis for a credit decision.
+This is a portfolio project using historical competition data. The random split does not establish performance through time, the fairness analysis is exploratory, and the stress scenarios are synthetic. The API is a local prototype; deployment, security controls, live alerts, and model registry integration are not implemented.
 
-See [the model card](docs/model_card.md) for intended use, known risks, and release criteria.
+Further development could add SQL-based relational features, automated training, API integration tests, containerization, cloud deployment, and experiment tracking. Time-based validation would require suitable dated data.
+
+See the [model card](docs/model_card.md) for intended use and limitations.
